@@ -41,11 +41,11 @@ def hello():
     return {"message": "Hello 42!"}
 
 @app.get("/tasks")
-def get_tasks(db: Session = Depends(get_db)):
-    return db.query(models.Task).all()
+def get_tasks(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    return db.query(models.Task).filter(models.Task.user_id == current_user.id).all()
 
 @app.get("/tasks/{id}")
-def get_task(id: int, db: Session = Depends(get_db)):
+def get_task(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     task = db.query(models.Task).filter(models.Task.id == id).first()
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -53,14 +53,14 @@ def get_task(id: int, db: Session = Depends(get_db)):
 
 @app.post("/tasks")
 def create_task(task: TaskSchema, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    db_task = models.Task(title=task.title, done=task.done)
+    db_task = models.Task(title=task.title, done=task.done, user_id=current_user.id)
     db.add(db_task)
     db.commit()
     db.refresh(db_task)
     return db_task
 
 @app.delete("/tasks/{id}")
-def delete_task(id: int, db: Session = Depends(get_db)):
+def delete_task(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     task = db.query(models.Task).filter(models.Task.id == id).first()
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -69,7 +69,7 @@ def delete_task(id: int, db: Session = Depends(get_db)):
     return {"message": f"Task {id} deleted"}
 
 @app.put("/tasks/{id}")
-def update_task(id: int, updated_task: TaskSchema, db: Session = Depends(get_db)):
+def update_task(id: int, updated_task: TaskSchema, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     task = db.query(models.Task).filter(models.Task.id == id).first()
     if task is None:
         raise HTTPException(status_code= 404, detail="Task not found")
