@@ -6,6 +6,7 @@
 ![Docker](https://img.shields.io/badge/Docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![JWT](https://img.shields.io/badge/Auth-JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
 ![Render](https://img.shields.io/badge/Deployed-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)
+![Supabase](https://img.shields.io/badge/Database-Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 
 A RESTful API for task management, built with FastAPI and PostgreSQL.  
 **🌐 Live demo**: https://task-manager-api-e8k0.onrender.com/docs
@@ -21,7 +22,7 @@ A RESTful API for task management, built with FastAPI and PostgreSQL.
 - ✅ Pydantic validation on all inputs
 - ✅ pytest test suite
 - ✅ Docker + docker-compose
-- ✅ Deployed on Render.com
+- ✅ Deployed on Render.com + Supabase
 
 ---
 
@@ -31,7 +32,7 @@ A RESTful API for task management, built with FastAPI and PostgreSQL.
 |---|---|
 | Framework | FastAPI |
 | Language | Python 3.11 |
-| Database | PostgreSQL |
+| Database | PostgreSQL (Supabase) |
 | ORM | SQLAlchemy 2.0 |
 | Auth | JWT (python-jose + passlib/bcrypt) |
 | Validation | Pydantic v2 |
@@ -139,6 +140,41 @@ Authorization: Bearer <token>
 ```bash
 pytest
 ```
+
+---
+
+## ☁️ Infrastructure Decisions
+
+### Why Render.com for hosting?
+
+Originally attempted deployment on **Railway**, but encountered an environment variable injection bug on their platform (not a code issue). Switched to Render, which offers a simpler deployment experience for Python APIs: auto-detects the runtime, reads `requirements.txt`, and redeploys automatically on every `git push`.
+
+| | Render (free tier) | Railway (free tier) |
+|---|---|---|
+| Python support | ✅ Native | ✅ Native |
+| Auto-deploy on push | ✅ | ✅ |
+| PostgreSQL included | ✅ (90-day limit) | ✅ |
+| Reliability | ✅ Stable | ⚠️ Env var bugs |
+| Cold start | ⚠️ ~30s after 15min idle | ⚠️ Similar |
+| Custom domains | ✅ | ✅ |
+
+**Limitation**: Free tier sleeps after 15 minutes of inactivity. First request after idle takes ~10–30 seconds to respond (cold start).
+
+---
+
+### Why Supabase for the database?
+
+Render's free PostgreSQL is deleted after **90 days**. For a project meant to store real data long-term, Supabase is a better choice: free tier with persistent storage, a built-in web UI to inspect the database, and standard PostgreSQL — no code changes needed, just swap the `DB_URL`.
+
+| | Supabase (free tier) | Render PostgreSQL (free tier) |
+|---|---|---|
+| Data persistence | ✅ Permanent | ⚠️ Deleted after 90 days |
+| Web UI | ✅ Built-in table editor | ❌ |
+| Standard PostgreSQL | ✅ | ✅ |
+| IPv4 support | ✅ Via connection pooler | ✅ |
+| Region (EU) | ✅ | ✅ |
+
+**Note**: Render's free tier only supports IPv4. Supabase's direct connection uses IPv6, which causes a `Network is unreachable` error. Solution: use Supabase's **Session Pooler** URL (`pooler.supabase.com`) instead of the direct URL (`db.supabase.co`).
 
 ---
 
