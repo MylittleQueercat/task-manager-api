@@ -33,3 +33,5 @@ uvicorn main:app --reload
 | POST | /tasks | Create a task |
 | PUT | /tasks/{id} | Update a task |
 | DELETE | /tasks/{id} | Delete a task |
+
+http://127.0.0.1:8000/docs

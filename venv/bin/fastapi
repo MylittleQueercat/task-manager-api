@@ -1,4 +1,4 @@
-#!/Users/leticiabi/Desktop/42Commoncore/Python_Study/task_manager/venv/bin/python3.11
+#!/Users/leticiabi/Desktop/42Commoncore/task-manager-api/venv/bin/python3.11
 import sys
 from fastapi.cli import main
 if __name__ == '__main__':
