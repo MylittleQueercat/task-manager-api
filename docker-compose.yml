@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: taskmanager
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+
+  api:
+    build: .
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db/taskmanager
+    depends_on:
+      - db
+    restart: on-failure
